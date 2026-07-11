@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const todo = { ...req.id, ...req.body };
   if (req.id != req.body.user) {
-    res.status(401).status({
+    res.status(401).json({
       success: false,
       message: "401 Unauthorized",
     });
