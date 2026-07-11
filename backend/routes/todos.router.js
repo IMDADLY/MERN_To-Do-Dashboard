@@ -16,6 +16,12 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const todo = { ...req.id, ...req.body };
+  if (req.id != req.body.user) {
+    res.status(401).status({
+      success: false,
+      message: "401 Unauthorized",
+    });
+  }
   try {
     const newToDo = await toDoModel.create(todo);
     res.status(201).json({
