@@ -5,6 +5,7 @@ const toDoSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "UserModel",
     immutable: true,
+    required: true,
   },
   title: {
     type: String,
