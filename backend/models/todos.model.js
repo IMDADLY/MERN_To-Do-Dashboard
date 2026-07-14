@@ -4,6 +4,7 @@ const toDoSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
     ref: "UserModel",
+    immutable: true,
   },
   title: {
     type: String,
@@ -17,6 +18,7 @@ const toDoSchema = new Schema({
   createdAt: {
     type: Object,
     default: () => new Date(),
+    immutable: true,
   },
 });
 export default mongoose.model("todo", toDoSchema);
