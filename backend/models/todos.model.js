@@ -10,14 +10,6 @@ const toDoSchema = new Schema({
     required: true,
   },
   description: String,
-  endDate: {
-    type: Object,
-    default: () => {
-      const d = new Date();
-      d.setHours(23, 59, 59);
-      return d;
-    },
-  },
   isCompleted: {
     type: Boolean,
     default: false,
