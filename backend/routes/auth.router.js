@@ -5,15 +5,14 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-  if (req.body.password.length < 8) {
-    res.status(400).json({
-      success: false,
-      message: "Password must have atleast 8 characters",
-    });
-  }
   try {
+    if (req.body.password.length < 8) {
+      return res.status(400).send({
+        success: false,
+        message: "Password must have atleast 8 characters",
+      });
+    }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    console.log(hashedPassword);
     const user = {
       user: req.body.user,
       passwordHash: hashedPassword,
@@ -21,18 +20,18 @@ router.post("/register", async (req, res) => {
     };
     try {
       const newUser = await UserModel.create(user);
-      res.status(201).json({
+      res.status(201).send({
         success: true,
         data: newUser,
       });
     } catch (err) {
-      res.status(400).json({
+      res.status(400).send({
         success: false,
         message: err.message,
       });
     }
   } catch (err) {
-    res.status(500).json({
+    res.status(500).send({
       success: false,
       message: err.message,
     });
@@ -40,39 +39,47 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const userDetails = await UserModel.findOne({
-    user: req.body.user,
-  });
-  if (!userDetails) {
-    res.status(404).json({
-      success: false,
-      message: "404 Not Found",
-    });
-  }
-  const { _id, passwordHash, user } = userDetails;
   try {
-    bcrypt.compare(req.body.password, passwordHash, async (err, same) => {
-      if (same) {
-        const accessToken = jwt.sign(
-          { sub: _id, name: user },
-          process.env.ACCESS_TOKEN_SECRET,
-        );
-        await UserModel.updateOne({ _id: _id }, { jwt: accessToken });
-        res.status(200).json({
-          success: true,
-          message: "Login successful!",
-          accessToken: accessToken,
-        });
-      } else {
-        res.status(401).json({
-          success: false,
-          message: err,
-        });
-      }
+    const { user, password } = req.body;
+    if (!user || !password) {
+      return res.status(400).send({
+        success: false,
+        message: "User and password are required",
+      });
+    }
+    const InvalidCreds = () => {
+      res.status(401).send({
+        success: false,
+        message: "Invalid credentials",
+      });
+    };
+    const userDetails = await UserModel.findOne({
+      user: req.body.user,
+    });
+    if (!userDetails) {
+      return InvalidCreds;
+    }
+    const { _id, passwordHash, user: username } = userDetails;
+    const passwordMatch = await bcrypt.compare(password, passwordHash);
+    if (!passwordMatch) {
+      return InvalidCreds;
+    }
+    const accessToken = jwt.sign(
+      {
+        sub: _id,
+        user: username,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "1h" },
+    );
+    res.status(200).send({
+      success: true,
+      message: "Login successful",
+      accessToken,
     });
   } catch (err) {
     console.log(`Error : ${err.message}`);
-    res.status(500).json({
+    res.status(500).send({
       success: false,
       message: err.message,
     });

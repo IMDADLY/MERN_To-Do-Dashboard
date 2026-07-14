@@ -14,21 +14,19 @@ const authenaticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (!token) {
-    res.status(401).json({
+    res.status(401).send({
       success: false,
       message: "No authentication token",
     });
   }
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const { sub, name } = decoded;
-    req.id = sub;
-    req.name = name;
+    req.user = decoded;
     next();
   } catch (err) {
-    res.status(403).json({
+    res.status(403).send({
       success: false,
-      message: err.message,
+      message: "403 Forbidden",
     });
   }
 };

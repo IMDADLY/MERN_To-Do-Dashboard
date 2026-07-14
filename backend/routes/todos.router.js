@@ -4,82 +4,98 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const todos = await toDoModel.find({ user: req.id });
-    res.status(200).json({ success: true, data: todos });
+    const { sub: user } = req.user;
+    const todos = await toDoModel.find({ user });
+    res.status(200).send({ success: true, data: todos });
   } catch (err) {
-    res.status(500).json({
+    console.error(err.message);
+    res.status(500).send({
       success: false,
-      message: err.message,
+      message: "Internal Server Error",
     });
   }
 });
 
 router.post("/", async (req, res) => {
-  const todo = { ...req.id, ...req.body };
-  if (req.id != req.body.user) {
-    res.status(401).json({
-      success: false,
-      message: "401 Unauthorized",
-    });
-  }
   try {
-    const newToDo = await toDoModel.create(todo);
-    res.status(201).json({
-      success: true,
-      data: newToDo,
-    });
+    const { sub: user } = req.user;
+    const { title, description } = req.body;
+    try {
+      const newToDo = await toDoModel.create({
+        user,
+        title,
+        description,
+      });
+      res.status(201).send({
+        success: true,
+        data: newToDo,
+      });
+    } catch (err) {
+      res.status(400).send({
+        success: false,
+        message: err.message,
+      });
+    }
   } catch (err) {
-    res.status(400).json({
+    console.error(err.message);
+    res.status(500).send({
       success: false,
-      message: err.message,
+      message: "Internal Server Error",
     });
   }
 });
 
 router.put("/:id", async (req, res) => {
-  const id = req.params.id;
-  const todo = await toDoModel.findById(id);
-  if (!todo) {
-    res.status(404).json({
-      success: false,
-      message: "404 Not Found",
-    });
-  }
   try {
-    const updated = await toDoModel.updateOne({ _id: id }, req.body, {
-      runValidators: true,
-    });
-    res.status(201).json({
+    const { id } = req.params;
+    const { title, description, isCompleted } = req.body;
+    const updated = await toDoModel.findOneAndUpdate(
+      { _id: id },
+      {
+        title,
+        description,
+        isCompleted,
+      },
+      { returnDocument: "after", runValidators: true },
+    );
+    if (!updated) {
+      return res.status(404).send({
+        success: false,
+        message: "404 Not Found",
+      });
+    }
+    res.status(200).send({
       success: true,
       data: updated,
     });
   } catch (err) {
-    res.status(500).json({
+    console.error(err.message);
+    res.status(500).send({
       success: false,
-      message: err.message,
+      message: "Internal Server Error",
     });
   }
 });
 
 router.delete("/:id", async (req, res) => {
-  const id = req.params.id;
-  const todo = await toDoModel.findById(id);
-  if (!todo) {
-    res.status(404).json({
-      success: false,
-      messafe: "404 Not found",
-    });
-  }
   try {
+    const id = req.params.id;
+    const todo = await toDoModel.findById(id);
+    if (!todo) {
+      return res.status(404).send({
+        success: false,
+        message: "404 Not found",
+      });
+    }
     const deleted = await todo.deleteOne();
-    res.status(204).json({
+    return res.status(200).send({
       success: true,
       message: deleted,
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(500).send({
       success: false,
-      message: err.message,
+      message: "Internal Server Error",
     });
   }
 });
