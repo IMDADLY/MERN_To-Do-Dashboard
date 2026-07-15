@@ -1,6 +1,12 @@
 import express from "express";
 import toDoModel from "../models/todos.model.js";
 const router = express.Router();
+const serverError = (res) => {
+  res.status(500).send({
+    success: false,
+    message: "Internal Server Error",
+  });
+};
 
 router.get("/", async (req, res) => {
   try {
@@ -9,10 +15,7 @@ router.get("/", async (req, res) => {
     res.status(200).send({ success: true, data: todos });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send({
-      success: false,
-      message: "Internal Server Error",
-    });
+    serverError(res);
   }
 });
 
@@ -38,19 +41,17 @@ router.post("/", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.status(500).send({
-      success: false,
-      message: "Internal Server Error",
-    });
+    serverError(res);
   }
 });
 
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { sub: user } = req.user;
     const { title, description, isCompleted } = req.body;
     const updated = await toDoModel.findOneAndUpdate(
-      { _id: id },
+      { _id: id, user },
       {
         title,
         description,
@@ -70,33 +71,27 @@ router.put("/:id", async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send({
-      success: false,
-      message: "Internal Server Error",
-    });
+    serverError(res);
   }
 });
 
 router.delete("/:id", async (req, res) => {
   try {
-    const id = req.params.id;
-    const todo = await toDoModel.findById(id);
-    if (!todo) {
+    const { id } = req.params;
+    const { sub: user } = req.user;
+    const deleted = await toDoModel.findOneAndDelete({ _id: id, user });
+    if (!deleted) {
       return res.status(404).send({
         success: false,
-        message: "404 Not found",
+        message: "404 Not Found",
       });
     }
-    const deleted = await todo.deleteOne();
-    return res.status(200).send({
+    res.status(200).send({
       success: true,
       message: deleted,
     });
   } catch (err) {
-    res.status(500).send({
-      success: false,
-      message: "Internal Server Error",
-    });
+    serverError(res);
   }
 });
 

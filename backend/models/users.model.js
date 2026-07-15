@@ -22,9 +22,6 @@ const userSchema = new Schema({
     validate: [isEmail, "invalid email"],
     unique: true,
   },
-  jwt: {
-    type: String,
-  },
 });
 userSchema.plugin(uniqueValidator);
 export default mongoose.model("user", userSchema);
