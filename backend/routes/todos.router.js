@@ -4,7 +4,7 @@ const router = express.Router();
 const serverError = (res) => {
   res.status(500).send({
     success: false,
-    message: "Internal Server Error",
+    message: "INTERNAL_SERVER_ERROR",
   });
 };
 
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
     } catch (err) {
       res.status(400).send({
         success: false,
-        message: err.message,
+        message: "BAD_REQUEST",
       });
     }
   } catch (err) {
@@ -83,14 +83,15 @@ router.delete("/:id", async (req, res) => {
     if (!deleted) {
       return res.status(404).send({
         success: false,
-        message: "404 Not Found",
+        message: "404 NOT FOUND",
       });
     }
     res.status(200).send({
       success: true,
-      message: deleted,
+      message: "DELETION_SUCCESSFUL",
     });
   } catch (err) {
+    console.error(err.message);
     serverError(res);
   }
 });
