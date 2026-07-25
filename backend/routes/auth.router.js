@@ -30,7 +30,7 @@ router.post("/register", async (req, res) => {
     if (password.length < 8) {
       return res.status(400).send({
         success: false,
-        message: "Password must have atleast 8 characters",
+        message: "PASSWORD_MUST_HAVE_ATLEAST_8_CHARACTERS",
       });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,7 +49,7 @@ router.post("/register", async (req, res) => {
       console.error(err.message);
       res.status(400).send({
         success: false,
-        message: "400 Bad Request",
+        message: "400_BAD_REQUEST",
       });
     }
   } catch (err) {
@@ -159,12 +159,12 @@ router.post("/refresh", async (req, res) => {
           );
           res.cookie("Authorization", "Bearer " + accessToken, {
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: "None",
             maxAge: 10 * 60 * 1000,
           });
           res.cookie("jwt", newRefreshToken, {
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: "None",
             path: "/auth/refresh",
             maxAge: 10 * 24 * 60 * 60 * 1000,
           });
