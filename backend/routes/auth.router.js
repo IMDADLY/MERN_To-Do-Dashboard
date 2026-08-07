@@ -18,6 +18,38 @@ const Unauthorized = (res) => {
   });
 };
 
+const setCookies = (res, refreshToken, accessToken) => {
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    path: "/auth/refresh",
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+  });
+  res.cookie("Authorization", "Bearer " + accessToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: 10 * 60 * 1000,
+  });
+};
+
+const setTokens = (userID) => {
+  const accessToken = jwt.sign(
+    {
+      sub: userID,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: "10m" },
+  );
+  const refreshToken = jwt.sign(
+    {
+      sub: userID,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: "10d" },
+  );
+  return [accessToken, refreshToken];
+};
+
 router.post("/register", async (req, res) => {
   try {
     const { user, password, email } = req.body;
@@ -41,6 +73,8 @@ router.post("/register", async (req, res) => {
     };
     try {
       const newUser = await UserModel.create(userData);
+      const [accessToken, refreshToken] = setTokens(newUser.id);
+      setCookies(res, refreshToken, accessToken);
       res.status(201).send({
         success: true,
         data: newUser,
@@ -84,20 +118,7 @@ router.post("/login", async (req, res) => {
     if (passwordMatch == false) {
       return InvalidCreds(res);
     }
-    const accessToken = jwt.sign(
-      {
-        sub: _id,
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "10m" },
-    );
-    const refreshToken = jwt.sign(
-      {
-        sub: _id,
-      },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "10d" },
-    );
+    const [accessToken, refreshToken] = setTokens(_id);
     try {
       const hashed_refreshToken = await bcrypt.hash(refreshToken, 10);
       await UserModel.updateOne(
@@ -108,17 +129,7 @@ router.post("/login", async (req, res) => {
       console.error(err.message);
       return serverError(res);
     }
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      sameSite: "strict",
-      path: "/auth/refresh",
-      maxAge: 10 * 24 * 60 * 60 * 1000,
-    });
-    res.cookie("Authorization", "Bearer " + accessToken, {
-      httpOnly: true,
-      sameSite: "strict",
-      maxAge: 10 * 60 * 1000,
-    });
+    setCookies(res, refreshToken, accessToken);
     res.status(200).send({
       success: true,
       message: "LOGIN_SUCCESSFUL",
@@ -143,31 +154,8 @@ router.post("/refresh", async (req, res) => {
           check.refreshToken,
         );
         if (tokenMatch) {
-          const accessToken = jwt.sign(
-            {
-              sub: refreshToken.sub,
-            },
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "10m" },
-          );
-          const newRefreshToken = jwt.sign(
-            {
-              sub: refreshToken.sub,
-            },
-            process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: "10d" },
-          );
-          res.cookie("Authorization", "Bearer " + accessToken, {
-            httpOnly: true,
-            sameSite: "None",
-            maxAge: 10 * 60 * 1000,
-          });
-          res.cookie("jwt", newRefreshToken, {
-            httpOnly: true,
-            sameSite: "None",
-            path: "/auth/refresh",
-            maxAge: 10 * 24 * 60 * 60 * 1000,
-          });
+          const [accessToken, refreshToken] = setTokens(refreshToken.sub);
+          setCookies(res, refreshToken, accessToken);
           res.status(200).send({
             success: true,
             message: "REFRESH_SUCCSESFUL",

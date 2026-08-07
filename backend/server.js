@@ -16,7 +16,7 @@ const logger = (req, res, next) => {
 const Unauthorized = (res) => {
   res.status(401).send({
     success: false,
-    message: "401 Unauthorized",
+    message: "401_UNAUTHORIZED",
   });
 };
 
@@ -48,7 +48,7 @@ const authenaticateToken = async (req, res, next) => {
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "UPDATE", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
 );

@@ -14,7 +14,7 @@ const toDoSchema = new Schema({
   description: String,
   isCompleted: {
     type: Boolean,
-    default: false,
+    default: () => false,
   },
   createdAt: {
     type: Object,
