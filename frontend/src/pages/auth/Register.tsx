@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
+const BASE_URL = "http://localhost:3000/auth/register";
 const Register = () => {
+  const navigate = useNavigate();
   const noErrors = {
     user: "",
     email: "",
@@ -10,6 +13,26 @@ const Register = () => {
     ...noErrors,
   });
   const [errors, setErrors] = useState(noErrors);
+
+  const getTodos = async (details) => {
+    try {
+      const { user, password, email } = details;
+      await axios.post(
+        BASE_URL,
+        {
+          user,
+          password,
+          email,
+        },
+        { withCredentials: true },
+      );
+      navigate("/todos");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log("Request completed");
+    }
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     const errs = validate();
@@ -34,7 +57,7 @@ const Register = () => {
   return (
     <>
       <div>
-        <h1>Sign Up for an Account</h1>
+        <h1>Sign Up For An Account</h1>
         <form onSubmit={handleSubmit}>
           <h2>Personal information</h2>
           <hr></hr>
@@ -91,26 +114,6 @@ const Register = () => {
       </div>
     </>
   );
-};
-
-const getTodos = async (details) => {
-  try {
-    const { user, password, email } = details;
-    const response = await axios.post(
-      "http://localhost:3000/auth/register",
-      {
-        user,
-        password,
-        email,
-      },
-      { withCredentials: true },
-    );
-    console.log(response.data);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    console.log("Request completed");
-  }
 };
 
 export default Register;

@@ -1,6 +1,5 @@
 import logo from "../assets/logo.png";
 import { Link } from "react-router";
-import "../assets/styles.css";
 const Navbar = ({ isLogged }) => {
   return (
     <nav className="bg-amber-100 flex">

@@ -1,15 +1,17 @@
 import { StrictMode } from "react";
-import Root from "./pages/Root";
-import Error from "./pages/Error";
-import AuthLayout from "./pages/AuthLayout";
-import About from "./components/About";
-import Home from "./components/Home";
-import Login from "./components/Login";
-import Register from "./components/Register";
+import Root from "./layouts/Root";
+import AuthLayout from "./layouts/AuthLayout";
+import HomeLayout from "./layouts/HomeLayout";
+import notFound from "./pages/notFound";
+import About from "./pages/About";
+import Home from "./pages/todos/Home";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Item from "./pages/todos/Item";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
-
+import "./assets/styles.css";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -24,8 +26,15 @@ const router = createBrowserRouter([
           { path: "register", Component: Register },
         ],
       },
-      { path: "todos/:userId", Component: Home }, //contain the todo list.
-      { path: "*", Component: Error },
+      {
+        path: "todos",
+        Component: HomeLayout,
+        children: [
+          { index: true, Component: Home },
+          { path: ":id", Component: Item },
+        ],
+      }, //contain the todo list.
+      { path: "*", Component: notFound },
     ],
   },
 ]);

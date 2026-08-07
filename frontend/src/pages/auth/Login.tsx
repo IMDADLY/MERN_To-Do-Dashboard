@@ -1,6 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
+const BASE_URL = "http://localhost:3000/auth/login";
 const Login = () => {
+  const navigate = useNavigate();
   const noErrors = {
     user: "",
     password: "",
@@ -9,6 +12,26 @@ const Login = () => {
     ...noErrors,
   });
   const [errors, setErrors] = useState(noErrors);
+
+  const authenticateUser = async (details) => {
+    try {
+      const { user, password } = details;
+      await axios.post(
+        BASE_URL,
+        {
+          user,
+          password,
+        },
+        { withCredentials: true },
+      );
+      navigate("/todos");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log("request completed");
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const errs = validate();
@@ -74,25 +97,6 @@ const Login = () => {
       </div>
     </>
   );
-};
-
-const authenticateUser = async (details) => {
-  try {
-    const { user, password } = details;
-    const response = await axios.post(
-      "http://localhost:3000/auth/login",
-      {
-        user,
-        password,
-      },
-      { withCredentials: true },
-    );
-    console.log(response.data);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    console.log("Request completed");
-  }
 };
 
 export default Login;
