@@ -20,29 +20,22 @@ const Unauthorized = (res) => {
   });
 };
 
-const authenaticateToken = async (req, res, next) => {
+const authenaticateToken = (req, res, next) => {
   if (req.cookies?.Authorization) {
     const accessToken = req.cookies.Authorization.split(" ")[1];
     try {
       const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-      if (Math.floor(Date.now() / 1000) <= decoded.exp) {
-        const { sub } = decoded;
-        req.user = { sub };
-        next();
-      } else {
-        res.status(401).send({
-          success: false,
-          message: "TOKEN_EXPIRED",
-        });
-      }
+      const { sub } = decoded;
+      req.user = { sub };
+      next();
     } catch (err) {
-      res.status(401).send({
+      return res.status(401).send({
         success: false,
         message: "INVALID_TOKEN",
       });
     }
   } else {
-    Unauthorized(res);
+    return Unauthorized(res);
   }
 };
 app.use(

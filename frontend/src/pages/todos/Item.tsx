@@ -1,9 +1,7 @@
 import { useLocation, useParams, useNavigate } from "react-router";
 import { useState } from "react";
 import { Radio } from "react-loader-spinner";
-import axios from "axios";
-const BASE_URL = "http://localhost:3000/api/todos/";
-const REFRESH_URL = "http://localhost:3000/auth/refresh";
+import axiosPrivate from "../../api/axiosPrivate";
 type Todo = {
   title: string;
   description: string;
@@ -24,75 +22,33 @@ const Item = () => {
   const method: method = location?.state?.method;
   const postItem = async (toDo) => {
     const { title, description, isCompleted } = toDo;
-    try {
-      setIsLoading(true);
-      await axios.post(
-        BASE_URL,
-        {
-          title,
-          description,
-          isCompleted,
-        },
-        { withCredentials: true },
-      );
-      navigate("/todos");
-    } catch (err) {
-      const errMessage = err.response?.data.message;
-      if (errMessage === "401_UNAUTHORIZED" || errMessage === "TOKEN_EXPIRED") {
-        await axios.post(REFRESH_URL, {}, { withCredentials: true });
-        await axios.post(
-          BASE_URL,
-          { title, description, isCompleted },
-          { withCredentials: true },
-        );
-        navigate("/todos");
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true);
+    await axiosPrivate.post("/api/todos", {
+      title,
+      description,
+      isCompleted,
+    });
+    navigate("/todos");
+    setIsLoading(false);
   };
   const updateItem = async (toDo) => {
     const id = params.id;
     const { title, description, isCompleted } = toDo;
-    try {
-      setIsLoading(true);
-      await axios.put(
-        BASE_URL + id,
-        {
-          title,
-          description,
-          isCompleted,
-        },
-        { withCredentials: true },
-      );
-      navigate("/todos");
-    } catch (err) {
-      const errMessage = err.response?.data.message;
-      if (errMessage === "401_UNAUTHORIZED" || errMessage === "TOKEN_EXPIRED") {
-        await axios.post(REFRESH_URL, {}, { withCredentials: true });
-        await axios.post(BASE_URL + id, { ...toDo }, { withCredentials: true });
-        navigate("/todos");
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true);
+    await axiosPrivate.put(`/api/todos/${id}`, {
+      title,
+      description,
+      isCompleted,
+    });
+    navigate("/todos");
+    setIsLoading(false);
   };
   const deleteItem = async () => {
-    try {
-      setIsLoading(false);
-      const id = params.id;
-      await axios.delete(BASE_URL + id, { withCredentials: true });
-      navigate("/todos");
-    } catch (err) {
-      const errMessage = err.response?.data.message;
-      if (errMessage === "401_UNAUTHORIZED" || errMessage === "TOKEN_EXPIRED") {
-        await axios.post(REFRESH_URL, {}, { withCredentials: true });
-        await axios.delete(BASE_URL, { withCredentials: true });
-        navigate("/todos");
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
+    const id = params.id;
+    await axiosPrivate.delete(`/api/todos/${id}`);
+    navigate("/todos");
+    setIsLoading(false);
   };
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -164,7 +120,7 @@ const Item = () => {
           <label>
             Completed
             <input
-              readOnly={readOnly}
+              disabled={readOnly || method == "POST"}
               type="checkbox"
               id="isCompleted"
               name="isCompleted"

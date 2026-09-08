@@ -33,7 +33,7 @@ const router = createBrowserRouter([
           { index: true, Component: Home },
           { path: ":id", Component: Item },
         ],
-      }, //contain the todo list.
+      },
       { path: "*", Component: notFound },
     ],
   },

@@ -12,10 +12,10 @@ router.get("/", async (req, res) => {
   try {
     const { sub: user } = req.user;
     const todos = await toDoModel.find({ user });
-    res.status(200).send({ success: true, data: todos });
+    return res.status(200).send({ success: true, data: todos });
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 
@@ -29,19 +29,19 @@ router.post("/", async (req, res) => {
         title,
         description,
       });
-      res.status(201).send({
+      return res.status(201).send({
         success: true,
         data: newToDo,
       });
     } catch (err) {
-      res.status(400).send({
+      return res.status(400).send({
         success: false,
         message: "BAD_REQUEST",
       });
     }
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 
@@ -62,16 +62,16 @@ router.put("/:id", async (req, res) => {
     if (!updated) {
       return res.status(404).send({
         success: false,
-        message: "404 Not Found",
+        message: "404_NOT_FOUND",
       });
     }
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       data: updated,
     });
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 
@@ -83,16 +83,16 @@ router.delete("/:id", async (req, res) => {
     if (!deleted) {
       return res.status(404).send({
         success: false,
-        message: "404 NOT FOUND",
+        message: "404_NOT_FOUND",
       });
     }
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "DELETION_SUCCESSFUL",
     });
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 

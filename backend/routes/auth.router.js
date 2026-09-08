@@ -7,17 +7,22 @@ const router = express.Router();
 const serverError = (res) => {
   res.status(500).send({
     success: false,
-    message: "Internal Server Error",
+    message: "INTERNAL_SERVER_ERROR",
   });
 };
 
 const Unauthorized = (res) => {
   res.status(401).send({
     success: false,
-    message: "401 Unauthorized",
+    message: "401_UNAUTHORIZED",
   });
 };
-
+const InvalidCreds = (res) => {
+  res.status(401).send({
+    success: false,
+    message: "INVALID_CREDENTIALS",
+  });
+};
 const setCookies = (res, refreshToken, accessToken) => {
   res.cookie("jwt", refreshToken, {
     httpOnly: true,
@@ -28,6 +33,7 @@ const setCookies = (res, refreshToken, accessToken) => {
   res.cookie("Authorization", "Bearer " + accessToken, {
     httpOnly: true,
     sameSite: "strict",
+    path: "/",
     maxAge: 10 * 60 * 1000,
   });
 };
@@ -75,20 +81,31 @@ router.post("/register", async (req, res) => {
       const newUser = await UserModel.create(userData);
       const [accessToken, refreshToken] = setTokens(newUser.id);
       setCookies(res, refreshToken, accessToken);
-      res.status(201).send({
+      return res.status(201).send({
         success: true,
         data: newUser,
       });
     } catch (err) {
-      console.error(err.message);
-      res.status(400).send({
+      if (err.errors.user?.kind == "unique") {
+        return res.status(400).send({
+          success: false,
+          message: "USERNAME_TAKEN",
+        });
+      }
+      if (err.errors.email?.kind == "unique") {
+        return res.status(400).send({
+          success: false,
+          message: "EMAIL_ALREADY_REGISTERED",
+        });
+      }
+      return res.status(400).send({
         success: false,
-        message: "400_BAD_REQUEST",
+        message: "BAD_REQUEST",
       });
     }
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 
@@ -101,12 +118,6 @@ router.post("/login", async (req, res) => {
         message: "REQUIRED_INPUT",
       });
     }
-    const InvalidCreds = (res) => {
-      res.status(401).send({
-        success: false,
-        message: "INVALID_CREDENTIALS",
-      });
-    };
     const userDetails = await UserModel.findOne({
       user: req.body.user,
     });
@@ -116,7 +127,10 @@ router.post("/login", async (req, res) => {
     const { _id, passwordHash, user: username } = userDetails;
     const passwordMatch = await bcrypt.compare(password, passwordHash);
     if (passwordMatch == false) {
-      return InvalidCreds(res);
+      return res.send({
+        success: false,
+        message: "INCORRECT_PASSWORD",
+      });
     }
     const [accessToken, refreshToken] = setTokens(_id);
     try {
@@ -130,13 +144,13 @@ router.post("/login", async (req, res) => {
       return serverError(res);
     }
     setCookies(res, refreshToken, accessToken);
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "LOGIN_SUCCESSFUL",
     });
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 
@@ -154,27 +168,36 @@ router.post("/refresh", async (req, res) => {
           check.refreshToken,
         );
         if (tokenMatch) {
-          const [accessToken, refreshToken] = setTokens(refreshToken.sub);
-          setCookies(res, refreshToken, accessToken);
-          res.status(200).send({
+          const [accessToken, newRefreshToken] = setTokens(refreshToken.sub);
+          setCookies(res, newRefreshToken, accessToken);
+          try {
+            const hashed_refreshToken = await bcrypt.hash(refreshToken, 10);
+            await UserModel.updateOne(
+              { _id: _id },
+              { refreshToken: hashed_refreshToken },
+            );
+          } catch (err) {
+            return serverError(res);
+          }
+          return res.status(200).send({
             success: true,
             message: "REFRESH_SUCCSESFUL",
           });
-        } else Unauthorized(res);
+        }
+        return Unauthorized(res);
       } catch (err) {
         if (err.name == "TokenExpiredError") {
-          res.status(401).send({
+          return res.status(401).send({
             success: false,
             message: "LOG_IN_REQUIRED",
           });
-        } else {
-          Unauthorized(res);
         }
+        return Unauthorized(res);
       }
-    } else Unauthorized(res);
+    }
   } catch (err) {
     console.error(err.message);
-    serverError(res);
+    return serverError(res);
   }
 });
 
