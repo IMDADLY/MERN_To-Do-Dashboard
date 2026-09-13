@@ -6,7 +6,7 @@ interface QueueItem {
   reject: (reason?: unknown) => void;
 }
 const axiosPrivate = axios.create({
-  baseURL: `${import.meta.env.BASE_URL}`,
+  baseURL: `${import.meta.env.VITE_API_URL}`,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });

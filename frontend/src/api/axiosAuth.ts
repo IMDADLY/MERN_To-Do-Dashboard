@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 const axiosAuth = axios.create({
-  baseURL: `${import.meta.env.BASE_URL}/auth`,
+  baseURL: `${import.meta.env.VITE_API_URL}/auth`,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
