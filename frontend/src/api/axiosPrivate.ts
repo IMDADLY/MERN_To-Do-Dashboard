@@ -2,7 +2,7 @@ import axios from "axios";
 import axiosAuth from "./axiosAuth";
 import { toast } from "react-toastify";
 const axiosPrivate = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: `${import.meta.env.BASE_URL}`,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });

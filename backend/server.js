@@ -40,7 +40,7 @@ const authenaticateToken = (req, res, next) => {
 };
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || 5000,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),

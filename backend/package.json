@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --env-file=config/.env server.js"
+
+  "dev": "nodemon --env-file=config/.env server.js",
+  "start": "node --env-file=config/.env server.js"
   },
   "keywords": [],
   "author": "",
