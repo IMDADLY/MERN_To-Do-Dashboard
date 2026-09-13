@@ -2,12 +2,13 @@ import { StrictMode } from "react";
 import Root from "./layouts/Root";
 import AuthLayout from "./layouts/AuthLayout";
 import HomeLayout from "./layouts/HomeLayout";
-import notFound from "./pages/notFound";
+import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import Home from "./pages/todos/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Item from "./pages/todos/Item";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
+    ErrorBoundary: ErrorBoundary,
     children: [
       { index: true, Component: About },
       {
@@ -34,7 +36,7 @@ const router = createBrowserRouter([
           { path: ":id", Component: Item },
         ],
       },
-      { path: "*", Component: notFound },
+      { path: "*", Component: NotFound },
     ],
   },
 ]);

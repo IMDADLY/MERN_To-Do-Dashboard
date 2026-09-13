@@ -6,18 +6,22 @@ type Errors = {
   user: string;
   password: string;
 };
+type Details = {
+  user: string;
+  password: string;
+};
 const Login = () => {
   const navigate = useNavigate();
   const noErrors: Errors = {
     user: "",
     password: "",
   };
-  const [details, setDetails] = useState<Errors>({
+  const [details, setDetails] = useState<Details>({
     ...noErrors,
   });
   const [errors, setErrors] = useState<Errors>(noErrors);
   const [isLoading, setIsLoading] = useState(false);
-  const authenticateUser = async (details) => {
+  const authenticateUser = async (details: Details) => {
     try {
       setIsLoading(true);
       const { user, password } = details;
@@ -26,14 +30,12 @@ const Login = () => {
         password,
       });
       navigate("/todos");
-    } catch (error) {
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     const errs = validate();
     if (!errs) {
@@ -61,48 +63,66 @@ const Login = () => {
         width="50"
         colors={["green", "green", "green"]}
         ariaLabel="radio-loading"
+        className="mx-auto my-16"
       />
       {/* Render component when the condition is true*/}
       {!isLoading && (
-        <div>
-          <h1>Sign In To Your Account</h1>
-          <form onSubmit={handleSubmit}>
-            <h2>Personal information</h2>
-            <hr></hr>
-            <label>
-              Username
+        <div className="max-w-xl mx-auto mt-10">
+          <p className="text-2xl font-bold text-amber-950 tracking-tight mb-6 text-center">
+            Sign In To Your Account
+          </p>
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-2xl bg-amber-50 p-8 shadow-xl border border-amber-200 space-y-6"
+          >
+            <p className="text-lg font-semibold text-amber-900">
+              Personal information
+            </p>
+            <hr className="border-amber-200"></hr>
+            <label className="block space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Username
+              </span>
               <input
                 type="text"
                 name="user"
                 id="user"
                 value={details.user}
-                className="m-8 rounded border-gray-300 shadow-sm sm:text-sm"
+                className="w-full rounded-lg border border-amber-300 bg-white px-4 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-colors sm:text-sm"
                 onChange={(e) =>
                   setDetails({ ...details, user: e.target.value })
                 }
               />
               {errors.user && (
-                <span className="text-red-400 text-xs p-2">{errors.user}</span>
+                <span className="text-red-500 text-xs font-medium p-2 block">
+                  {errors.user}
+                </span>
               )}
             </label>
-            <label>
-              Password
+            <label className="block space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Password
+              </span>
               <input
-                type="text"
+                type="password"
                 name="password"
                 id="password"
                 value={details.password}
+                className="w-full rounded-lg border border-amber-300 bg-white px-4 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-colors sm:text-sm"
                 onChange={(e) =>
                   setDetails({ ...details, password: e.target.value })
                 }
               />
               {errors.password && (
-                <span className="text-red-400 text-xs p-2">
+                <span className="text-red-500 text-xs font-medium p-2 block">
                   {errors.password}
                 </span>
               )}
             </label>
-            <button type="submit" className="bg-blue-500 rounded-xs p-2 m-4">
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-amber-600 py-2.5 font-semibold text-white shadow-md transition-all duration-200 hover:bg-amber-700 hover:shadow-lg"
+            >
               Submit
             </button>
           </form>

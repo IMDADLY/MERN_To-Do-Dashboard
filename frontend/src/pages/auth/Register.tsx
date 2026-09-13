@@ -2,6 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Radio } from "react-loader-spinner";
 import axiosAuth from "../../api/axiosAuth";
+type Details = {
+  user: string;
+  email: string;
+  password: string;
+};
 const Register = () => {
   const navigate = useNavigate();
   const noErrors = {
@@ -9,12 +14,12 @@ const Register = () => {
     email: "",
     password: "",
   };
-  const [details, setDetails] = useState({
+  const [details, setDetails] = useState<Details>({
     ...noErrors,
   });
   const [errors, setErrors] = useState(noErrors);
   const [isLoading, setIsLoading] = useState(false);
-  const getTodos = async (details) => {
+  const registerUser = async (details: Details) => {
     try {
       setIsLoading(true);
       const { user, password, email } = details;
@@ -24,17 +29,15 @@ const Register = () => {
         email,
       });
       navigate("/todos");
-    } catch (error) {
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     const errs = validate();
     if (!errs) {
-      getTodos(details);
+      registerUser(details);
     }
   };
   const validate = () => {
@@ -59,62 +62,85 @@ const Register = () => {
         width="50"
         colors={["green", "green", "green"]}
         ariaLabel="radio-loading"
+        className="mx-auto my-16"
       />
       {!isLoading && (
-        <div>
-          <h1>Sign Up For An Account</h1>
-          <form onSubmit={handleSubmit}>
-            <h2>Personal information</h2>
-            <hr></hr>
-            <label>
-              Username
+        <div className="max-w-xl mx-auto mt-10">
+          <p className="text-2xl font-bold text-amber-950 tracking-tight mb-6 text-center">
+            Sign Up For An Account
+          </p>
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-2xl bg-amber-50 p-8 shadow-xl border border-amber-200 space-y-6"
+          >
+            <p className="text-lg font-semibold text-amber-900">
+              Personal information
+            </p>
+            <hr className="border-amber-200"></hr>
+            <label className="block space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Username
+              </span>
               <input
                 type="text"
                 name="user"
                 id="user"
                 value={details.user}
-                className="m-8 rounded border-gray-300 shadow-sm sm:text-sm"
+                className="w-full rounded-lg border border-amber-300 bg-white px-4 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-colors sm:text-sm"
                 onChange={(e) =>
                   setDetails({ ...details, user: e.target.value })
                 }
               />
               {errors.user && (
-                <span className="text-red-400 text-xs p-2">{errors.user}</span>
+                <span className="text-red-500 text-xs font-medium p-2 block">
+                  {errors.user}
+                </span>
               )}
             </label>
-            <label>
-              Email Address
+            <label className="block space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Email Address
+              </span>
               <input
                 type="text"
                 name="email"
                 id="email"
                 value={details.email}
+                className="w-full rounded-lg border border-amber-300 bg-white px-4 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-colors sm:text-sm"
                 onChange={(e) =>
                   setDetails({ ...details, email: e.target.value })
                 }
               />
               {errors.email && (
-                <span className="text-red-400 text-xs p-2">{errors.email}</span>
+                <span className="text-red-500 text-xs font-medium p-2 block">
+                  {errors.email}
+                </span>
               )}
             </label>
-            <label>
-              Password
+            <label className="block space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Password
+              </span>
               <input
-                type="text"
+                type="password"
                 name="password"
                 id="password"
                 value={details.password}
+                className="w-full rounded-lg border border-amber-300 bg-white px-4 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-colors sm:text-sm"
                 onChange={(e) =>
                   setDetails({ ...details, password: e.target.value })
                 }
               />
               {errors.password && (
-                <span className="text-red-400 text-xs p-2">
+                <span className="text-red-500 text-xs font-medium p-2 block">
                   {errors.password}
                 </span>
               )}
             </label>
-            <button type="submit" className="bg-blue-500 rounded-xs p-2 m-4">
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-amber-600 py-2.5 font-semibold text-white shadow-md transition-all duration-200 hover:bg-amber-700 hover:shadow-lg"
+            >
               Submit
             </button>
           </form>
