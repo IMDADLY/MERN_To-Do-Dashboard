@@ -6,7 +6,7 @@
   "scripts": {
 
   "dev": "nodemon --env-file=config/.env server.js",
-  "start": "node --env-file=config/.env server.js"
+  "start": "node server.js"
   },
   "keywords": [],
   "author": "",
