@@ -38,9 +38,27 @@ const authenaticateToken = (req, res, next) => {
     return Unauthorized(res);
   }
 };
+const allowedOrigins = [
+  "http://localhost:5173", // local dev
+  process.env.CLIENT_URL, // your stable production URL, from Render's env vars
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 5000,
+    origin: (origin, callback) => {
+      // allow non-browser requests (Postman, curl, server-to-server) which send no origin
+      if (!origin) return callback(null, true);
+
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/mern-to-do-dashboard-.*\.vercel\.app$/.test(origin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
