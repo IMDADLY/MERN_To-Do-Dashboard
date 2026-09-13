@@ -43,7 +43,9 @@ axiosPrivate.interceptors.response.use(
         return axiosPrivate(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        // window.location.href = "/login";
+        setTimeout(() => {
+          window.location.href = "auth/login";
+        }, 20000);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

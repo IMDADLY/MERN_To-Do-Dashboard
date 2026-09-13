@@ -171,12 +171,13 @@ router.post("/refresh", async (req, res) => {
           const [accessToken, newRefreshToken] = setTokens(refreshToken.sub);
           setCookies(res, newRefreshToken, accessToken);
           try {
-            const hashed_refreshToken = await bcrypt.hash(refreshToken, 10);
+            const hashed_refreshToken = await bcrypt.hash(newRefreshToken, 10);
             await UserModel.updateOne(
-              { _id: _id },
+              { _id: refreshToken.sub },
               { refreshToken: hashed_refreshToken },
             );
           } catch (err) {
+            console.log(err);
             return serverError(res);
           }
           return res.status(200).send({
