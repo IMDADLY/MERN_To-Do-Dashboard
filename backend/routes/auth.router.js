@@ -26,13 +26,15 @@ const InvalidCreds = (res) => {
 const setCookies = (res, refreshToken, accessToken) => {
   res.cookie("jwt", refreshToken, {
     httpOnly: true,
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none",
     path: "/auth/refresh",
     maxAge: 10 * 24 * 60 * 60 * 1000,
   });
   res.cookie("Authorization", "Bearer " + accessToken, {
     httpOnly: true,
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none",
     path: "/",
     maxAge: 10 * 60 * 1000,
   });
@@ -127,10 +129,7 @@ router.post("/login", async (req, res) => {
     const { _id, passwordHash, user: username } = userDetails;
     const passwordMatch = await bcrypt.compare(password, passwordHash);
     if (passwordMatch == false) {
-      return res.send({
-        success: false,
-        message: "INCORRECT_PASSWORD",
-      });
+      return InvalidCreds(res);
     }
     const [accessToken, refreshToken] = setTokens(_id);
     try {
