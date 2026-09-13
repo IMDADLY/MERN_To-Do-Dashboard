@@ -63,7 +63,7 @@ const Login = () => {
         width="50"
         colors={["green", "green", "green"]}
         ariaLabel="radio-loading"
-        className="mx-auto my-16"
+        wrapperClass="mx-auto my-16"
       />
       {/* Render component when the condition is true*/}
       {!isLoading && (

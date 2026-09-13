@@ -1,14 +1,18 @@
 import axios from "axios";
 import axiosAuth from "./axiosAuth";
 import { toast } from "react-toastify";
+interface QueueItem {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}
 const axiosPrivate = axios.create({
   baseURL: `${import.meta.env.BASE_URL}`,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 let isRefreshing = false;
-let failedQueue = [];
-const processQueue = (error = null) => {
+let failedQueue: QueueItem[] = [];
+const processQueue = (error: unknown = null) => {
   failedQueue.forEach((promise) => {
     if (error) {
       promise.reject(error);
@@ -41,7 +45,7 @@ axiosPrivate.interceptors.response.use(
         await axiosAuth.post("/refresh");
         processQueue();
         return axiosPrivate(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: unknown) {
         processQueue(refreshError);
         return Promise.reject(refreshError);
       } finally {

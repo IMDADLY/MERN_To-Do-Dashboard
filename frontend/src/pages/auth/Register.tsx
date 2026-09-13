@@ -62,7 +62,7 @@ const Register = () => {
         width="50"
         colors={["green", "green", "green"]}
         ariaLabel="radio-loading"
-        className="mx-auto my-16"
+        wrapperClass="mx-auto my-16"
       />
       {!isLoading && (
         <div className="max-w-xl mx-auto mt-10">

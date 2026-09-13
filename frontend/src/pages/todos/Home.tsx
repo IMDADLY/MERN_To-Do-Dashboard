@@ -34,7 +34,7 @@ const Home = () => {
         width="50"
         colors={["#d97706", "#d97706", "#d97706"]}
         ariaLabel="radio-loading"
-        className="mx-auto my-16"
+        wrapperClass="mx-auto my-16"
       />
 
       {!isLoading && (
