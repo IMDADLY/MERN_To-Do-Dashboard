@@ -7,7 +7,7 @@ const Navbar = ({ isLogged }: { isLogged: boolean }) => {
   const userLogOut = async () => {
     try {
       await axiosAuth.post("/logout");
-      navigate("/about");
+      navigate("/");
     } catch {}
   };
   return (
