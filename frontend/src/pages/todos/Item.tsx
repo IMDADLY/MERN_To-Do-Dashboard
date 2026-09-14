@@ -30,6 +30,7 @@ const Item = () => {
         isCompleted,
       });
       navigate("/todos");
+    } catch {
     } finally {
       setIsLoading(false);
     }

@@ -30,6 +30,7 @@ const Login = () => {
         password,
       });
       navigate("/todos");
+    } catch {
     } finally {
       setIsLoading(false);
     }

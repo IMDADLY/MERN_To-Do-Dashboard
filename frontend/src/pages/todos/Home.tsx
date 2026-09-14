@@ -20,6 +20,7 @@ const Home = () => {
       try {
         const response = await axiosPrivate.get("/api/todos");
         setToDoList(response.data.data);
+      } catch {
       } finally {
         setIsLoading(false);
       }

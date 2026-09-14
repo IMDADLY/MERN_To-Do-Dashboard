@@ -29,6 +29,7 @@ const Register = () => {
         email,
       });
       navigate("/todos");
+    } catch {
     } finally {
       setIsLoading(false);
     }

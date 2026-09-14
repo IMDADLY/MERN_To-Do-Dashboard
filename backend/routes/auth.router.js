@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import UserModel from "../models/users.model.js";
 import jwt from "jsonwebtoken";
+import usersModel from "../models/users.model.js";
 const router = express.Router();
 
 const serverError = (res) => {
@@ -194,9 +195,41 @@ router.post("/refresh", async (req, res) => {
         }
         return Unauthorized(res);
       }
-    }
+    } else return Unauthorized(res);
   } catch (err) {
-    console.error(err.message);
+    return serverError(res);
+  }
+});
+
+router.post("/logout", async (req, res) => {
+  try {
+    if (req.cookies?.Authorization) {
+      const accessToken = jwt.verify(
+        req.cookies.Authorization.split(" ")[1],
+        process.env.ACCESS_TOKEN_SECRET,
+      );
+      await UserModel.updateOne({ _id: accessToken.sub }, { refreshToken: "" });
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/auth/refresh",
+      });
+      res.clearCookie("Authorization", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
+      res.setHeader("Clear-Site-Data", '"cookies"');
+      res.status(200).send({
+        success: true,
+        message: "LOGGED_OUT_SUCCESSFULLY",
+      });
+    } else return Unauthorized(res);
+  } catch (error) {
+    if (error.name == "JsonWebTokenError" || error.name == "TokenExpiredError")
+      return Unauthorized(res);
     return serverError(res);
   }
 });
